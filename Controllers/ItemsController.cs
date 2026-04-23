@@ -18,12 +18,12 @@ namespace TestProject.Controllers {
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Item>> Get([FromQuery] string? path)
+        public ActionResult<DirectoryListing> Get([FromQuery] string? path)
         {
             try
             {
-                var items = _itemService.GetItems(path ?? "");
-                return Ok(items);
+                DirectoryListing directoryListing = _itemService.GetItems(path ?? "");
+                return Ok(directoryListing);
             }
             catch (DirectoryNotFoundException)
             {

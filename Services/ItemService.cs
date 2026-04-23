@@ -31,8 +31,9 @@ public class ItemService : IItemService
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Item> GetItems(string path)
+    public DirectoryListing GetItems(string path)
     {
+        DirectoryListing directoryListing = new DirectoryListing();
         List<Item> itemsResult = new List<Item>();
         try
         {
@@ -50,8 +51,15 @@ public class ItemService : IItemService
                 IEnumerable<string> filePaths = Directory.EnumerateFiles(fullPath);
                 IEnumerable<string> folderPaths = Directory.EnumerateDirectories(fullPath);
 
+                directoryListing.FileCount = filePaths.Count();
+                directoryListing.FolderCount = folderPaths.Count();
+
+                long totalSize = 0;
                 foreach (string filePath in filePaths)
                 {
+                    FileInfo fileInfo = new FileInfo(filePath);
+                    totalSize += fileInfo.Length;
+
                     Item newFile = new Item();
                     newFile.Name = Path.GetFileName(filePath);
                     // I'm avoiding exposure of the system's absolute path for security
@@ -60,6 +68,8 @@ public class ItemService : IItemService
 
                     itemsResult.Add(newFile);
                 }
+
+                directoryListing.TotalSize = totalSize;
 
                 foreach (string folderPath in folderPaths)
                 {
@@ -70,6 +80,8 @@ public class ItemService : IItemService
 
                     itemsResult.Add(newFolder);
                 }
+                directoryListing.Items = itemsResult;
+
             }
             else
             {
@@ -83,12 +95,7 @@ public class ItemService : IItemService
         }
 
         _logger.LogInformation($"Execution of Service: [ItemService] Method: [GetItemsAsync] completed succesfully. Returning {itemsResult.Count} items");
-        return itemsResult;
-    }
-
-    public Item RenameItem(string path, string name)
-    {
-        throw new NotImplementedException();
+        return directoryListing;
     }
 
     public IEnumerable<Item> SearchItems(string path, string query)

@@ -26,3 +26,4 @@
 /Users/alejandrochacon/Documents/Git/TestProject/obj/Debug/net8.0/TestProject.pdb
 /Users/alejandrochacon/Documents/Git/TestProject/obj/Debug/net8.0/TestProject.genruntimeconfig.cache
 /Users/alejandrochacon/Documents/Git/TestProject/obj/Debug/net8.0/ref/TestProject.dll
+/Users/alejandrochacon/Documents/git/TestProject/obj/Debug/net8.0/TestProject.sourcelink.json

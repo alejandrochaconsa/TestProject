@@ -6,8 +6,7 @@ public interface IItemService
 {
     void DeleteItem(string path);
     Task<Stream> DownloadFileAsync(string path);
-    IEnumerable<Item> GetItems(string path);
-    Item RenameItem(string path, string name);
+    DirectoryListing GetItems(string path);
     IEnumerable<Item> SearchItems(string path, string query);
     Task<Item> UploadFileAsync(string path, IFormFile file);
     
