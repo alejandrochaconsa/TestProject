@@ -9,12 +9,34 @@ namespace TestProject.Controllers {
     {
 
         private readonly IItemService _itemService;
-        // TODO: 
-        // Add rate limiting
-        // Add Authentication
+
         public ItemsController(IItemService itemService)
         {
             _itemService = itemService;    
+        }
+
+        [HttpGet("download")]
+        public IActionResult DownloadFile([FromQuery] string path)
+        {
+            try
+            {
+                Stream fileStream = _itemService.DownloadFile(path);
+                return File(fileStream, "application/octet-stream", Path.GetFileName(path));
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred");
+            }
+            
         }
 
         [HttpGet]
@@ -32,6 +54,10 @@ namespace TestProject.Controllers {
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred");
             }
         }
     }   

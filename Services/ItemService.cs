@@ -26,9 +26,41 @@ public class ItemService : IItemService
         throw new NotImplementedException();
     }
 
-    public Task<Stream> DownloadFileAsync(string path)
+    public Stream DownloadFile(string path)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation($"Executing Service: [ItemService] Method: [GetItemsAsync]");
+        
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("path for the file to be downloaded is invalid");
+        }
+
+        Stream fileStreamResult;
+
+        try
+        {
+            string fullPath = Path.Combine(_baseStorageDirectory, path);
+            if (!Path.GetFullPath(fullPath).StartsWith(_baseStorageDirectory))
+            {
+                throw new ArgumentException("Invalid path");
+            }
+
+            if (File.Exists(fullPath))
+            {
+                fileStreamResult = File.OpenRead(fullPath);
+            }
+            else
+            {
+                throw new FileNotFoundException(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in Service: [ItemService] Method: [DownloadFile] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
+            throw;
+        }
+
+        return fileStreamResult;
     }
 
     public DirectoryListing GetItems(string path)
