@@ -28,8 +28,8 @@ public class ItemService : IItemService
 
     public Stream DownloadFile(string path)
     {
-        _logger.LogInformation($"Executing Service: [ItemService] Method: [GetItemsAsync]");
-        
+        _logger.LogInformation($"Executing Service: [ItemService] Method: [DownloadFile]");
+
         if (string.IsNullOrWhiteSpace(path))
         {
             throw new ArgumentException("path for the file to be downloaded is invalid");
@@ -59,6 +59,7 @@ public class ItemService : IItemService
             _logger.LogError($"Error in Service: [ItemService] Method: [DownloadFile] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
             throw;
         }
+        _logger.LogInformation($"Execution of Service: [ItemService] Method: [DownloadFile] completed succesfully.");
 
         return fileStreamResult;
     }
@@ -70,7 +71,7 @@ public class ItemService : IItemService
         try
         {
             path ??= ""; // if path is null handle gracefully to root
-            _logger.LogInformation($"Executing Service: [ItemService] Method: [GetItemsAsync]");
+            _logger.LogInformation($"Executing Service: [ItemService] Method: [GetItems]");
 
             string fullPath = Path.Combine(_baseStorageDirectory, path);
             if (!Path.GetFullPath(fullPath).StartsWith(_baseStorageDirectory))
@@ -122,17 +123,75 @@ public class ItemService : IItemService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error in Service: [ItemService] Method: [GetItemsAsync] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
+            _logger.LogError($"Error in Service: [ItemService] Method: [GetItems] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
             throw;
         }
 
-        _logger.LogInformation($"Execution of Service: [ItemService] Method: [GetItemsAsync] completed succesfully. Returning {itemsResult.Count} items");
+        _logger.LogInformation($"Execution of Service: [ItemService] Method: [GetItems] completed succesfully. Returning {itemsResult.Count} items");
         return directoryListing;
     }
 
-    public IEnumerable<Item> SearchItems(string path, string query)
+    public DirectoryListing SearchItems(string path, string query)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation($"Executing Service: [ItemService] Method: [SearchItems]");
+
+        path ??= "";
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            throw new ArgumentException("query cannot be empty");
+        }
+
+        string fullPath = Path.Combine(_baseStorageDirectory, path);
+        if (!Path.GetFullPath(fullPath).StartsWith(_baseStorageDirectory))
+        {
+            throw new ArgumentException("Invalid path");
+        }
+
+        DirectoryListing directoryListing = new DirectoryListing();
+        try
+        {
+            IEnumerable<string> itemPaths = Directory.EnumerateFileSystemEntries(fullPath, $"*{query}*", SearchOption.AllDirectories);
+            List<Item> searchItemsResult = new List<Item>();
+            int fileCount = 0;
+            int folderCount = 0;
+            long totalSize = 0;
+
+            foreach (string itemPath in itemPaths)
+            {
+                Item item = new Item();
+                if (File.Exists(itemPath))
+                {
+                    FileInfo fileInfo = new FileInfo(itemPath);
+                    totalSize += fileInfo.Length;
+
+                    item.Name = Path.GetFileName(itemPath);
+                    item.Path = Path.GetRelativePath(_baseStorageDirectory, itemPath);
+                    item.Type = ItemType.File;
+                    fileCount++;
+                }
+                else
+                {
+                    item.Name = Path.GetFileName(itemPath);
+                    item.Path = Path.GetRelativePath(_baseStorageDirectory, itemPath);
+                    item.Type = ItemType.Folder;
+                    folderCount++;
+                }
+                searchItemsResult.Add(item);
+            }
+            directoryListing.Items = searchItemsResult;
+            directoryListing.FileCount = fileCount;
+            directoryListing.FolderCount = folderCount;
+            directoryListing.TotalSize = totalSize;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in Service: [ItemService] Method: [SearchItems] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
+            throw;
+        }
+
+        _logger.LogInformation($"Execution of Service: [ItemService] Method: [SearchItems] completed succesfully. Items found: [{directoryListing.Items.Count()}]");
+        return directoryListing;
+        
     }
 
     public Task<Item> UploadFileAsync(string path, IFormFile file)

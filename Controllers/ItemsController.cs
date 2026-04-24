@@ -12,7 +12,7 @@ namespace TestProject.Controllers {
 
         public ItemsController(IItemService itemService)
         {
-            _itemService = itemService;    
+            _itemService = itemService;
         }
 
         [HttpGet("download")]
@@ -36,7 +36,7 @@ namespace TestProject.Controllers {
             {
                 return StatusCode(500, "An unexpected error occurred");
             }
-            
+
         }
 
         [HttpGet]
@@ -59,6 +59,29 @@ namespace TestProject.Controllers {
             {
                 return StatusCode(500, "An unexpected error occurred");
             }
+        }
+
+        [HttpGet("search")]
+        public ActionResult<DirectoryListing> SearchItems([FromQuery] string? path, [FromQuery] string query)
+        { 
+            try
+            {
+                DirectoryListing directoryListing = _itemService.SearchItems(path, query);
+                return Ok(directoryListing);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred");
+            }
+
         }
     }   
 }
