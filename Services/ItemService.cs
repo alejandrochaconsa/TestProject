@@ -21,11 +21,6 @@ public class ItemService : IItemService
         _baseStorageDirectory = Path.Combine(env.ContentRootPath, _config["FileStorage:Directory"] ?? "Storage");
     }
 
-    public void DeleteItem(string path)
-    {
-        throw new NotImplementedException();
-    }
-
     public Stream DownloadFile(string path)
     {
         _logger.LogInformation($"Executing Service: [ItemService] Method: [DownloadFile]");
@@ -64,7 +59,7 @@ public class ItemService : IItemService
         return fileStreamResult;
     }
 
-    public DirectoryListing GetItems(string path)
+    public DirectoryListing GetItems(string? path)
     {
         DirectoryListing directoryListing = new DirectoryListing();
         List<Item> itemsResult = new List<Item>();
@@ -131,7 +126,7 @@ public class ItemService : IItemService
         return directoryListing;
     }
 
-    public DirectoryListing SearchItems(string path, string query)
+    public DirectoryListing SearchItems(string? path, string query)
     {
         _logger.LogInformation($"Executing Service: [ItemService] Method: [SearchItems]");
 
@@ -194,8 +189,43 @@ public class ItemService : IItemService
         
     }
 
-    public Task<Item> UploadFileAsync(string path, IFormFile file)
+    public async Task<Item> UploadFileAsync(string? path, IFormFile file)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation($"Executing Service: [ItemService] Method: [UploadFileAsync]");
+
+        path ??= "";
+        Item itemResult = new Item();
+
+        if (file == null)
+        {
+            throw new ArgumentException("Invalid file");
+        }
+
+        string fileName = Path.GetFileName(file.FileName);
+        string fullPath = Path.Combine(_baseStorageDirectory, path, fileName);
+
+        if (!Path.GetFullPath(fullPath).StartsWith(_baseStorageDirectory))
+        {
+            throw new ArgumentException("Invalid path");
+        }
+
+        try
+        {
+            using FileStream fileStream = File.Create(fullPath);
+            await file.CopyToAsync(fileStream);
+
+            itemResult.Name = fileName;
+            itemResult.Path = Path.GetRelativePath(_baseStorageDirectory, fullPath);
+            itemResult.Type = ItemType.File;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in Service: [ItemService] Method: [UploadFileAsync] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
+            throw;
+        }
+
+        return itemResult;
+
     }
 }
