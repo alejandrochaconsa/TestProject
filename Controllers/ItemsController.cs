@@ -45,7 +45,7 @@ namespace TestProject.Controllers {
         {
             try
             {
-                DirectoryListing directoryListing = _itemService.GetItems(path ?? "");
+                DirectoryListing directoryListing = _itemService.GetItems(path);
                 return Ok(directoryListing);
             }
             catch (DirectoryNotFoundException)
