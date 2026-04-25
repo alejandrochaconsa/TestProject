@@ -1,7 +1,8 @@
-async function getItems(){
+async function getItems(path){
     try{
-        console.log("Getting items...");
-        const response = await fetch("/api/v1/items");
+        reloadBreadCrumbs(path);
+        
+        const response = await fetch(`/api/v1/items?path=${encodeURIComponent(path)}`);
         if(!response.ok){
             throw new Error(`Http error. Response status: ${response.status}`);
         }
@@ -14,12 +15,22 @@ async function getItems(){
 
         tbody.innerHTML = "";
         for(const item of data.items){
+            const isFolder = item.type === "Folder";
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${item.name}</td>
                 <td>${item.type}</td>
                 <td></td>
             `;
+
+            if (isFolder) {
+                row.style.cursor = "pointer";
+                row.style.color = "blue";
+                row.addEventListener("click", function(event){
+                    navigateToPath(item.path);
+                });
+            }
+
             tbody.appendChild(row);
         }
 
@@ -31,7 +42,51 @@ async function getItems(){
     catch (err) {
         console.log(`Error getting items. Error: ${err}`);
     }
-
 }
 
-getItems();
+function navigateToPath(path){
+    history.pushState({ path }, "", `?path=${encodeURIComponent(path)}`);
+    getItems(path);
+}
+
+window.addEventListener("popstate", function(event){
+    const path = new URLSearchParams(location.search).get("path") || "";
+    getItems(path);
+} );
+
+function reloadBreadCrumbs(path){
+    const breadcrumbElement = document.getElementById("breadcrumbs");
+    breadcrumbElement.innerHTML = "";
+
+    // adding a home link to naviage to root
+    const home = document.createElement("a");
+    home.textContent = "Home";
+    home.href = "#";
+    home.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigateToPath("");
+    });
+    breadcrumbElement.appendChild(home);
+
+    const folderList = path === "" ? [] : path.split("/");
+    let cumulative = "";
+
+    folderList.forEach((folder, index, folderList) => {
+        cumulative = cumulative === "" ? folder : `${cumulative}/${folder}`;
+        breadcrumbElement.append(" / ");
+
+        const linkElement = document.createElement("a");
+        linkElement.textContent = folder;
+        linkElement.href = "#";
+        const targetPath = cumulative;
+        linkElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            navigateToPath(targetPath);
+        });
+        breadcrumbElement.appendChild(linkElement);
+        
+    });
+}
+
+const initialPath = new URLSearchParams(location.search).get("path") || "";
+getItems(initialPath);
