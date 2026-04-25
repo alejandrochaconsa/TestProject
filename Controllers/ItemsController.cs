@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TestProject.Services;
 using TestProject.Models;
+using System.Threading.Tasks;
 
 namespace TestProject.Controllers {
     [ApiController]
@@ -49,7 +50,7 @@ namespace TestProject.Controllers {
             }
             catch (DirectoryNotFoundException)
             {
-                return NotFound();
+                return NotFound("Path not found");
             }
             catch (ArgumentException ex)
             {
@@ -63,7 +64,7 @@ namespace TestProject.Controllers {
 
         [HttpGet("search")]
         public ActionResult<DirectoryListing> SearchItems([FromQuery] string? path, [FromQuery] string query)
-        { 
+        {
             try
             {
                 DirectoryListing directoryListing = _itemService.SearchItems(path, query);
@@ -71,7 +72,7 @@ namespace TestProject.Controllers {
             }
             catch (DirectoryNotFoundException)
             {
-                return NotFound();
+                return NotFound("Path not found");
             }
             catch (ArgumentException ex)
             {
@@ -81,7 +82,29 @@ namespace TestProject.Controllers {
             {
                 return StatusCode(500, "An unexpected error occurred");
             }
+        }
 
+        [HttpPost("upload")]
+        public async Task<ActionResult<Item>> UploadFileAsync([FromQuery] string? path,[FromForm] IFormFile file)
+        {
+            try
+            {
+                Item item = await _itemService.UploadFileAsync(path, file);
+                return Ok(item);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return NotFound("Path not found");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred");
+            }
+        
         }
     }   
 }
