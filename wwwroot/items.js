@@ -7,36 +7,8 @@ async function getItems(path){
             throw new Error(`Http error. Response status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data);
 
-        const tbody = document.getElementById("item-list");
-        const itemsShown = document.getElementById("items-shown");
-        const totalSize = document.getElementById("total-size");
-
-        tbody.innerHTML = "";
-        for(const item of data.items){
-            const isFolder = item.type === "Folder";
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${item.name}</td>
-                <td>${item.type}</td>
-                <td></td>
-            `;
-
-            if (isFolder) {
-                row.style.cursor = "pointer";
-                row.style.color = "blue";
-                row.addEventListener("click", function(event){
-                    navigateToPath(item.path);
-                });
-            }
-
-            tbody.appendChild(row);
-        }
-
-        const totalItemCount = data.fileCount + data.folderCount;
-        itemsShown.textContent = totalItemCount;
-        totalSize.textContent = ((data.totalSize / (1024))).toFixed(1); // Conver bytes to KB 
+        renderItems(data);
 
     }
     catch (err) {
@@ -44,15 +16,54 @@ async function getItems(path){
     }
 }
 
+async function search(){
+    const searchInput = document.getElementById("search-input");
+    const path = new URLSearchParams(location.search).get("path") || "";
+    const response = await fetch(`/api/v1/items/search?path=${encodeURIComponent(path)}&query=${searchInput.value}`);
+
+    if(!response.ok){
+        throw new Error(`Http error. Response status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    renderItems(data);
+}
+
+function renderItems(data){
+    const tbody = document.getElementById("item-list");
+    const itemsShown = document.getElementById("items-shown");
+    const totalSize = document.getElementById("total-size");
+
+    tbody.innerHTML = "";
+    for(const item of data.items){
+        const isFolder = item.type === "Folder";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.type}</td>
+            <td></td>
+        `;
+
+        if (isFolder) {
+            row.style.cursor = "pointer";
+            row.style.color = "blue";
+            row.addEventListener("click", function(event){
+                navigateToPath(item.path);
+            });
+        }
+
+        tbody.appendChild(row);
+    }
+
+    const totalItemCount = data.fileCount + data.folderCount;
+    itemsShown.textContent = totalItemCount;
+    totalSize.textContent = ((data.totalSize / (1024))).toFixed(1); // Conver bytes to KB 
+}
+
 function navigateToPath(path){
     history.pushState({ path }, "", `?path=${encodeURIComponent(path)}`);
     getItems(path);
 }
-
-window.addEventListener("popstate", function(event){
-    const path = new URLSearchParams(location.search).get("path") || "";
-    getItems(path);
-} );
 
 function reloadBreadCrumbs(path){
     const breadcrumbElement = document.getElementById("breadcrumbs");
@@ -79,8 +90,8 @@ function reloadBreadCrumbs(path){
         linkElement.textContent = folder;
         linkElement.href = "#";
         const targetPath = cumulative;
-        linkElement.addEventListener("click", (e) => {
-            e.preventDefault();
+        linkElement.addEventListener("click", function(event) {
+            event.preventDefault();
             navigateToPath(targetPath);
         });
         breadcrumbElement.appendChild(linkElement);
@@ -88,5 +99,17 @@ function reloadBreadCrumbs(path){
     });
 }
 
+function init(){
+    window.addEventListener("popstate", function(event){
+        const path = new URLSearchParams(location.search).get("path") || "";
+        getItems(path);
+    } );
+
+    const searchButton = document.getElementById("search-button");
+    searchButton.addEventListener("click", search);
+
+}
+
+init();
 const initialPath = new URLSearchParams(location.search).get("path") || "";
 getItems(initialPath);
