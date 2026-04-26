@@ -84,6 +84,8 @@ namespace TestProject.Controllers {
             }
         }
 
+        // For production, I would specify the size limit for file uploads as well as the extension for security reason
+        // leaving it as is since the requirements do not specify anything about this
         [HttpPost("upload")]
         public async Task<ActionResult<Item>> UploadFileAsync([FromQuery] string? path,[FromForm] IFormFile file)
         {

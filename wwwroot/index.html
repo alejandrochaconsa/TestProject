@@ -18,16 +18,15 @@
     Download in every level -->
 
     <h1>File & Directory Explorer</h1>
-
-    <div>
-        <input id="search-input" placeholder="e.g. searchFile.txt" />
-        <button id="search-button">Search</button>
-        <br>
-        <br>
-        <button>Upload File</button>
-    </div>
     <br>
     <div><b>Breadcrumbs:</b> <span id="breadcrumbs"></span></div>
+    <br>
+    <div>
+        <br>
+        <input id="search-input" placeholder="e.g. SearchForFile" />
+        <button id="search-button">Search</button>
+        <br>
+    </div>
     <br>
     <table>
         <thead>
@@ -42,6 +41,12 @@
         <b>Items Shown:</b> <span id="items-shown"></span><br>
         <b>Total File Size:</b> <span id="total-size"></span> KB
     </div>
+    <br>
+    <br>
+    <h4>Upload File</h4>
+    <input id="upload-file-input" type="file">
+    <br>
+    <button id="upload-button">Upload</button>
 
     <script type="text/javascript" src="items.js"></script>
 </body>
