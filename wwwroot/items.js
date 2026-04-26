@@ -2,7 +2,7 @@ async function getItems(path){
     try{
         reloadBreadCrumbs(path);
         
-        const response = await fetch(`/api/v1/items?path=${encodeURIComponent(path)}`);
+        const response = await fetch(`/api/v1/items?path=${encodeURIComponent(path)}`, { method: "GET" });
         if(!response.ok){
             throw new Error(`Http error. Response status: ${response.status}`);
         }
@@ -19,7 +19,7 @@ async function getItems(path){
 async function search(){
     const searchInput = document.getElementById("search-input");
     const path = new URLSearchParams(location.search).get("path") || "";
-    const response = await fetch(`/api/v1/items/search?path=${encodeURIComponent(path)}&query=${searchInput.value}`);
+    const response = await fetch(`/api/v1/items/search?path=${encodeURIComponent(path)}&query=${searchInput.value}`, { method: "GET" });
 
     if(!response.ok){
         throw new Error(`Http error. Response status: ${response.status}`);
@@ -37,21 +37,26 @@ function renderItems(data){
     tbody.innerHTML = "";
     for(const item of data.items){
         const isFolder = item.type === "Folder";
+        const isFile = item.type === "File";
+        const actionsCell = isFile
+            ? `<a href="/api/v1/items/download?path=${encodeURIComponent(item.path)}" download>Download</a>`
+            : "";
+
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${item.name}</td>
             <td>${item.type}</td>
-            <td></td>
+            <td>${actionsCell}</td>
         `;
 
         if (isFolder) {
-            row.style.cursor = "pointer";
-            row.style.color = "blue";
-            row.addEventListener("click", function(event){
+            const nameCell = row.cells[0];
+            nameCell.style.cursor = "pointer";
+            nameCell.style.color = "blue";
+            nameCell.addEventListener("click", function(event){
                 navigateToPath(item.path);
             });
         }
-
         tbody.appendChild(row);
     }
 
@@ -99,7 +104,36 @@ function reloadBreadCrumbs(path){
     });
 }
 
+async function upload(){
+    const uploadFileInputElement = document.getElementById("upload-file-input");
+    const file = uploadFileInputElement.files[0];
+
+    if(!file) {
+        return;
+    }
+
+    const path = new URLSearchParams(location.search).get("path") || "";
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`/api/v1/items/upload?path=${encodeURIComponent(path)}`, { method: "POST", body: formData });
+
+    if(!response.ok){
+        console.error("Upload faliled");
+        return;
+    }
+
+    getItems(path);
+    uploadFileInputElement.value = "";
+  
+}
+
 function init(){
+
+    const initialPath = new URLSearchParams(location.search).get("path") || "";
+    getItems(initialPath);
+
     window.addEventListener("popstate", function(event){
         const path = new URLSearchParams(location.search).get("path") || "";
         getItems(path);
@@ -108,8 +142,10 @@ function init(){
     const searchButton = document.getElementById("search-button");
     searchButton.addEventListener("click", search);
 
+    const uploadButtonElement = document.getElementById("upload-button");
+    uploadButtonElement.addEventListener("click", upload);
+
 }
 
 init();
-const initialPath = new URLSearchParams(location.search).get("path") || "";
-getItems(initialPath);
+
