@@ -36,28 +36,49 @@ function renderItems(data){
 
     tbody.innerHTML = "";
     for(const item of data.items){
+
         const isFolder = item.type === "Folder";
         const isFile = item.type === "File";
-        const actionsCell = isFile
-            ? `<a href="/api/v1/items/download?path=${encodeURIComponent(item.path)}" download>Download</a>`
-            : "";
 
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${item.name}</td>
             <td>${item.type}</td>
-            <td>${actionsCell}</td>
+            <td></td>
         `;
 
         if (isFolder) {
             const nameCell = row.cells[0];
             nameCell.style.cursor = "pointer";
             nameCell.style.color = "blue";
-            nameCell.addEventListener("click", function(event){
+            nameCell.addEventListener("click", function(event) {
                 navigateToPath(item.path);
             });
         }
+
+        const actionsCell = row.cells[2];
+
+        if (isFile) {
+            const downloadLink = document.createElement("a");
+            downloadLink.href = `/api/v1/items/download?path=${encodeURIComponent(item.path)}`;
+            downloadLink.setAttribute("download", "");
+            downloadLink.textContent = "Download";
+            actionsCell.appendChild(downloadLink);
+            actionsCell.append(" ");
+        }
+
+        const deleteLink = document.createElement("a");
+        deleteLink.textContent = "Delete";
+        deleteLink.href = "#";
+        deleteLink.style.color = "red";
+        deleteLink.addEventListener("click", function(e) {
+            e.preventDefault();
+            deleteItem(item.path);
+        });
+        actionsCell.appendChild(deleteLink);
+
         tbody.appendChild(row);
+
     }
 
     const totalItemCount = data.fileCount + data.folderCount;
@@ -136,6 +157,23 @@ function clear(){
     const path = new URLSearchParams(location.search).get("path") || "";
     getItems(path);
 
+}
+
+async function deleteItem(path){
+    const deleteConfirmed = window.confirm(`Delete "${path}"?`);
+    if (!deleteConfirmed) {
+        return;
+    }
+
+    const response = await fetch(`/api/v1/items?path=${encodeURIComponent(path)}`, { method: "DELETE" });
+
+    if(!response.ok){
+        console.error("Delete failed");
+        return;
+    }
+
+    const currentPath = new URLSearchParams(location.search).get("path") || "";
+    getItems(currentPath);
 }
 
 function init(){
