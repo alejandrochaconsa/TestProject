@@ -37,11 +37,16 @@ function renderItems(data){
     tbody.innerHTML = "";
     for(const item of data.items){
         const isFolder = item.type === "Folder";
+        const isFile = item.type === "File";
+        const actionsCell = isFile
+            ? `<a href="/api/v1/items/download?path=${encodeURIComponent(item.path)}" download>Download</a>`
+            : "";
+
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${item.name}</td>
             <td>${item.type}</td>
-            <td></td>
+            <td>${actionsCell}</td>
         `;
 
         if (isFolder) {
