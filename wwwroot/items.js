@@ -129,6 +129,15 @@ async function upload(){
   
 }
 
+function clear(){
+    const searchInputElement = document.getElementById("search-input");
+    searchInputElement.value = "";
+
+    const path = new URLSearchParams(location.search).get("path") || "";
+    getItems(path);
+
+}
+
 function init(){
 
     const initialPath = new URLSearchParams(location.search).get("path") || "";
@@ -144,6 +153,9 @@ function init(){
 
     const uploadButtonElement = document.getElementById("upload-button");
     uploadButtonElement.addEventListener("click", upload);
+
+    const clearButtonElement = document.getElementById("clear-button");
+    clearButtonElement.addEventListener("click", clear);
 
 }
 
