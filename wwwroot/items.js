@@ -150,7 +150,7 @@ async function upload(){
   
 }
 
-function clear(){
+function clearSearch(){
     const searchInputElement = document.getElementById("search-input");
     searchInputElement.value = "";
 
@@ -193,7 +193,7 @@ function init(){
     uploadButtonElement.addEventListener("click", upload);
 
     const clearButtonElement = document.getElementById("clear-button");
-    clearButtonElement.addEventListener("click", clear);
+    clearButtonElement.addEventListener("click", clearSearch);
 
 }
 
