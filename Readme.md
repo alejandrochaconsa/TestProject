@@ -22,6 +22,3 @@ The storage directory is configurable in `appsettings.json` under `FileStorage:D
 - `DELETE /api/v1/items?path=` — delete a file
 
 A Postman collection is included at the repo Docs folder for testing.
-
-## Notes
-I commited the appsetting.json since it contains non sensitive configs. In a Prod environment you may want to inject any sensitive information via Github action secrets or a secret manager like Vault.
