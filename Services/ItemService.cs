@@ -21,6 +21,44 @@ public class ItemService : IItemService
         _baseStorageDirectory = Path.Combine(env.ContentRootPath, _config["FileStorage:Directory"] ?? "Storage");
     }
 
+    public void DeleteItem(string path)
+    {
+        _logger.LogInformation($"Executing Service: [ItemService] Method: [DeleteItem]");
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("path cannot be empty");
+        }
+
+        string fullPath = Path.Combine(_baseStorageDirectory, path);
+        if (!Path.GetFullPath(fullPath).StartsWith(_baseStorageDirectory))
+        {
+            throw new ArgumentException("Invalid file to delete");
+        }
+
+        try
+        {
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
+            else if (Directory.Exists(fullPath))
+            {
+                Directory.Delete(fullPath, true);
+            }
+            else
+            {
+                throw new FileNotFoundException();
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error in Service: [ItemService] Method: [DeleteItem] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
+            throw;
+        }
+    }
+
     public Stream DownloadFile(string path)
     {
         _logger.LogInformation($"Executing Service: [ItemService] Method: [DownloadFile]");

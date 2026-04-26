@@ -16,6 +16,28 @@ namespace TestProject.Controllers {
             _itemService = itemService;
         }
 
+        [HttpDelete]
+        public IActionResult DeleteItem([FromQuery] string path)
+        { 
+            try
+            {
+                _itemService.DeleteItem(path);
+                return NoContent();
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound("File/directory not found");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred");
+            }
+        }
+
         [HttpGet("download")]
         public IActionResult DownloadFile([FromQuery] string path)
         {

@@ -29,6 +29,33 @@
       "response": []
     },
     {
+      "name": "Items",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:7146/api/v1/items?path=MyTestFolder/MyTestFile2.txt",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7146",
+          "path": [
+            "api",
+            "v1",
+            "items"
+          ],
+          "query": [
+            {
+              "key": "path",
+              "value": "MyTestFolder/MyTestFile2.txt"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Search Items",
       "request": {
         "method": "GET",

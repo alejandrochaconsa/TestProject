@@ -19,6 +19,7 @@ The storage directory is configurable in `appsettings.json` under `FileStorage:D
 - `GET /api/v1/items/search?path=&query=` — search files and folders 
 - `GET /api/v1/items/download?path=` — download a file
 - `POST /api/v1/items/upload?path=` — upload a file
+- `DELETE /api/v1/items?path=` — delete a file
 
 A Postman collection is included at the repo Docs folder for testing.
 
