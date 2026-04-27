@@ -22,3 +22,7 @@ The storage directory is configurable in `appsettings.json` under `FileStorage:D
 - `DELETE /api/v1/items?path=` — delete a file
 
 A Postman collection is included at the repo Docs folder for testing.
+
+## UI Look and Feel
+
+![alt text](<Docs/Screenshot 2026-04-27 at 10.51.47 AM.png>)
