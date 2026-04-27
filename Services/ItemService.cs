@@ -50,13 +50,16 @@ public class ItemService : IItemService
             {
                 throw new FileNotFoundException();
             }
-            
+
         }
         catch (Exception ex)
         {
             _logger.LogError($"Error in Service: [ItemService] Method: [DeleteItem] Exception: [{ex}] InnerException: [{ex.InnerException}] Message: [{ex.Message}] StackTrace: [{ex.StackTrace}] ");
             throw;
         }
+
+        _logger.LogInformation($"Execution of Service: [ItemService] Method: [DeleteItem] completed succesfully.");
+        
     }
 
     public Stream DownloadFile(string path)
@@ -263,6 +266,7 @@ public class ItemService : IItemService
             throw;
         }
 
+        _logger.LogInformation($"Execution of Service: [ItemService] Method: [UploadFileAsync] completed succesfully.");
         return itemResult;
 
     }
