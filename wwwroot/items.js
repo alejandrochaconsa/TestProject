@@ -95,7 +95,7 @@ function reloadBreadCrumbs(path){
     const breadcrumbElement = document.getElementById("breadcrumbs");
     breadcrumbElement.innerHTML = "";
 
-    // adding a home link to naviage to root
+    // adding a home link to navigate to root
     const home = document.createElement("a");
     home.textContent = "Home";
     home.href = "#";
